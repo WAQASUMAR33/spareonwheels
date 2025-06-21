@@ -1,0 +1,24 @@
+// components/AllProductsCards.js
+import React from 'react';
+import ProductCard from '../../components/homepage/ProductCard';
+
+export default function AllProductsCards({ products }) {
+  return (
+    <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 px-2 md:px-0">
+      {products.map((product) => {
+        const discountPrice = product.price - (product.price * product.discount) / 100; // Calculate discount price for each product
+        return (
+          <div key={product.slug} className="">
+            <ProductCard
+              image={product.images[0].url}
+              title={product.name}
+              description={product.description}
+              price={discountPrice.toFixed(2)} // Format price to 2 decimal places
+              slug={product.slug}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
