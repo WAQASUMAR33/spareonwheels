@@ -1,11 +1,18 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
-  
 }
 
-generator client {
-  provider = "prisma-client-js"
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
 }
 
 model AdminUser {
@@ -19,84 +26,307 @@ model AdminUser {
 }
 
 model User {
-  id                      Int       @id @default(autoincrement())
-  email                   String?   @unique
-  password                String?
-  name                    String?
-  role                    String?
-  imageUrl                String?   // Adding image URL for the user profile picture
-  phoneno                 String?
-  city                    String?
-  balance                 Float?
-  status                  Int?
-  verificationToken  String?  @unique
-  verificationTokenExpires DateTime? // Field to store token expiration
-  emailVerified           Boolean   @default(false) // Field to store verification status
-  resetToken              String?   @unique
-  resetTokenExpires       DateTime?
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
+  id                     Int       @id @default(autoincrement()) @map("id")
+  email                  String?   @unique @map("email") @db.VarChar(191)
+  password               String?   @map("password") @db.VarChar(191)
+  name                   String?   @map("name") @db.VarChar(191)
+  role                   String?   @map("role") @db.VarChar(191)
+  imageUrl               String?   @map("imageUrl") @db.VarChar(191)
+  phoneno                String?   @map("phoneno") @db.VarChar(191)
+  city                   String?   @map("city") @db.VarChar(191)
+  balance                Float?    @map("balance")
+  status                 Int?      @map("status")
+  verificationToken      String?   @unique @map("verificationToken") @db.VarChar(191)
+  verificationTokenExpires DateTime? @map("verificationTokenExpires") @db.DateTime(3)
+  emailVerified          Boolean   @default(false) @map("emailVerified")
+  resetToken             String?   @unique @map("resetToken") @db.VarChar(191)
+  resetTokenExpires      DateTime? @map("resetTokenExpires") @db.DateTime(3)
+  createdAt              DateTime  @default(now()) @db.DateTime(3)
+  updatedAt              DateTime  @updatedAt @db.DateTime(3)
+  orders                 Order[]
+
+  @@map("User")
 }
 
-
 model Category {
-  id               Int           @id @default(autoincrement())
-  name             String
-  slug             String        @unique // Slug field to store the unique URL-friendly name
-  imageUrl         String?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  meta_title       String?
-  meta_description String?
-  meta_keywords    String?
+  id              Int          @id @default(autoincrement()) @map("id")
+  name            String       @map("name") @db.VarChar(191)
+  slug            String       @unique @db.VarChar(191)
+  imageUrl        String?      @map("imageUrl") @db.VarChar(191)
+  createdAt       DateTime     @default(now()) @db.DateTime(3)
+  updatedAt       DateTime     @updatedAt @db.DateTime(3)
+  metaTitle       String?      @map("meta_title") @db.VarChar(191)
+  metaDescription String?      @map("meta_description") @db.VarChar(191)
+  metaKeywords    String?      @map("meta_keywords") @db.VarChar(191)
+  services        Services[]
+  subcategories   Subcategory[]
 
-  // Relation to Services
-  services         Services[]    // One-to-many relationship with Services
+  @@map("Category")
 }
 
 model Services {
-  id               Int           @id @default(autoincrement())
-  name             String
-  description      String        @db.Text
-  discount         Float?
-  costprice        Float?
-  price            Float
-  categorySlug     String        // Foreign key to Category's slug
-  category         Category      @relation(fields: [categorySlug], references: [slug]) // Relation to Category
-  image            String?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  meta_title       String?
-  meta_description String?
-  meta_keywords    String?
+  id              Int       @id @default(autoincrement())
+  name            String
+  description     String    @db.Text
+  discount        Float?
+  costprice       Float?
+  price           Float
+  categorySlug    String    @db.VarChar(191)
+  category        Category  @relation(fields: [categorySlug], references: [slug])
+  image           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  metaTitle       String?   @map("meta_title")
+  metaDescription String?   @map("meta_description")
+  metaKeywords    String?   @map("meta_keywords")
 }
-
 
 model Blogcategories {
-  id          Int      @id @default(autoincrement())
-  title       String?
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
+  id          Int      @id @default(autoincrement()) @map("id")
+  title       String?  @map("title") @db.VarChar(191)
+  description String?  @map("description") @db.VarChar(191)
+  createdAt   DateTime @default(now()) @db.DateTime(3)
+  updatedAt   DateTime @updatedAt @db.DateTime(3)
+  blogs       Blog[]
 
+  @@map("Blogcategories")
+}
 
 model Blog {
-  id                Int      @id @default(autoincrement())
-  title             String
-  description       String   @db.Text
-  image             String
-  category          String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  meta_description  String?
-  meta_title        String?
-  meta_focusKeyword String?
-  web_slug          String?
+  id              Int           @id @default(autoincrement()) @map("id")
+  title           String        @map("title") @db.VarChar(191)
+  description     String        @map("description")
+  image           String        @map("image") @db.VarChar(191)
+  categoryId      Int           @map("categoryId")
+  createdAt       DateTime      @default(now()) @db.DateTime(3)
+  updatedAt       DateTime      @updatedAt @db.DateTime(3)
+  metaDescription String?       @map("meta_description") @db.VarChar(191)
+  metaTitle       String?       @map("meta_title") @db.VarChar(191)
+  metaFocusKeyword String?       @map("meta_focusKeyword") @db.VarChar(191)
+  webSlug         String?       @map("web_slug") @db.VarChar(191)
+  category        Blogcategories @relation(fields: [categoryId], references: [id])
+
+  @@map("Blog")
 }
 
+model FacebookPixel {
+  id        Int      @id @default(autoincrement()) @map("id")
+  pixelCode String   @map("pixelCode") @db.VarChar(191)
+  pixelId   String?  @map("pixelId") @db.VarChar(191)
+  createdAt DateTime @default(now()) @db.DateTime(3)
+  updatedAt DateTime @updatedAt @db.DateTime(3)
 
-enum Role {
-  ADMIN
-  CUSTOMER
+  @@map("FacebookPixel")
+}
+
+model Model {
+  id        String   @id @map("id") @db.VarChar(191)
+  model     String   @map("Model") @db.VarChar(191)
+  createdAt DateTime @default(now()) @db.DateTime(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.DateTime(3)
+
+  @@map("Model")
+}
+
+model Year {
+  id        String   @id @map("id") @db.VarChar(191)
+  year      String   @map("Year") @db.VarChar(191)
+  createdAt DateTime @default(now()) @db.DateTime(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.DateTime(3)
+
+  @@map("Year")
+}
+
+model Make {
+  id        String   @id @map("id") @db.VarChar(191)
+  image     String   @map("image") @db.VarChar(191)
+  make      String   @map("Make") @db.VarChar(191)
+  createdAt DateTime @default(now()) @db.DateTime(3)
+  updatedAt DateTime @default(now()) @updatedAt @db.DateTime(3)
+
+  @@map("Make")
+}
+
+model CompanyDetails {
+  id          Int      @id @default(autoincrement()) @map("id")
+  name        String   @map("name") @db.VarChar(191)
+  description String   @map("description") @db.VarChar(191)
+  headerImage String   @map("headerImage") @db.VarChar(191)
+  favIcon     String   @map("favIcon") @db.VarChar(191)
+  createdAt   DateTime @default(now()) @db.DateTime(3)
+  updatedAt   DateTime @updatedAt @db.DateTime(3)
+
+  @@map("CompanyDetails")
+}
+
+model ContactInfo {
+  id          Int      @id @default(autoincrement()) @map("id")
+  phoneNumber String   @map("phoneNumber") @db.VarChar(191)
+  email       String   @map("email") @db.VarChar(191)
+  address     String   @map("address") @db.VarChar(191)
+  website     String   @map("website") @db.VarChar(191)
+  owner       String   @map("owner") @db.VarChar(191)
+  createdAt   DateTime @default(now()) @db.DateTime(3)
+  updatedAt   DateTime @updatedAt @db.DateTime(3)
+
+  @@map("ContactInfo")
+}
+
+model Review {
+  id        Int      @id @default(autoincrement()) @map("id")
+  productId Int      @map("productId")
+  reviewer  String   @map("reviewer") @db.VarChar(191)
+  rating    Int      @map("rating")
+  comment   String?  @map("comment") @db.VarChar(191)
+  createdAt DateTime @default(now()) @db.DateTime(3)
+  updatedAt DateTime @updatedAt @db.DateTime(3)
+  status    String   @default("pending") @map("status") @db.VarChar(191)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("Review")
+}
+
+model Settings {
+  id            Int      @id @default(autoincrement()) @map("id")
+  deliveryCharge Float    @map("deliveryCharge")
+  taxPercentage Float    @map("taxPercentage")
+  other1        Float    @default(0) @map("other1")
+  other2        Float    @default(0) @map("other2")
+  createdAt     DateTime @default(now()) @db.DateTime(3)
+  updatedAt     DateTime @updatedAt @db.DateTime(3)
+
+  @@map("Settings")
+}
+
+model Slider {
+  id     Int    @id @default(autoincrement()) @map("id")
+  imgurl String @map("imgurl") @db.VarChar(191)
+  link   String @map("link") @db.VarChar(191)
+
+  @@map("Slider")
+}
+
+model OrderItem {
+  id            Int      @id @default(autoincrement()) @map("id")
+  orderId       Int      @map("orderId")
+  productId     Int      @map("productId")
+  quantity      Int      @map("quantity")
+  price         Float    @map("price")
+  selectedSize  String?  @map("selectedSize") @db.VarChar(191)
+  selectedColor String?  @map("selectedColor") @db.VarChar(191)
+  order         Order    @relation(fields: [orderId], references: [id])
+  product       Product  @relation(fields: [productId], references: [id])
+
+  @@map("OrderItem")
+}
+
+model Order {
+  id             Int         @id @default(autoincrement()) @map("id")
+  userId         Int?        @map("userId")
+  total          Float       @map("total")
+  discount       Float       @default(0.0) @map("discount")
+  tax            Float       @default(0.0) @map("tax")
+  netTotal       Float       @map("netTotal")
+  status         OrderStatus @map("status")
+  createdAt      DateTime    @default(now()) @db.DateTime(3)
+  updatedAt      DateTime    @updatedAt @db.DateTime(3)
+  recipientName  String      @map("recipientName") @db.VarChar(191)
+  streetAddress  String?     @map("streetAddress") @db.VarChar(191)
+  apartmentSuite String?     @map("apartmentSuite") @db.VarChar(191)
+  city           String      @map("city") @db.VarChar(191)
+  state          String      @map("state") @db.VarChar(191)
+  zip            String      @map("zip") @db.VarChar(191)
+  country        String      @map("country") @db.VarChar(191)
+  phoneNumber    String      @map("phoneNumber") @db.VarChar(191)
+  email          String      @map("email") @db.VarChar(191)
+  paymentMethod  String      @map("paymentMethod") @db.VarChar(191)
+  paymentInfo    Json?       @map("paymentInfo")
+  couponCode     String?     @map("couponCode") @db.VarChar(191)
+  shippingMethod String?     @map("shippingMethod") @db.VarChar(191)
+  shippingTerms  String?     @map("shippingTerms") @db.VarChar(191)
+  shipmentDate   DateTime?   @map("shipmentDate") @db.DateTime(3)
+  deliveryDate   DateTime?   @map("deliveryDate") @db.DateTime(3)
+  user           User?       @relation(fields: [userId], references: [id])
+  orderItems     OrderItem[]
+  coupon         Coupon?     @relation(fields: [couponCode], references: [code])
+
+  @@map("Order")
+}
+
+model Coupon {
+  id         Int      @id @default(autoincrement()) @map("id")
+  code       String   @unique @map("code") @db.VarChar(191)
+  discount   Float    @map("discount")
+  expiration DateTime? @map("expiration") @db.DateTime(3)
+  isActive   Boolean  @default(true) @map("isActive")
+  createdAt  DateTime @default(now()) @db.DateTime(3)
+  updatedAt  DateTime @updatedAt @db.DateTime(3)
+  orders     Order[]
+
+  @@map("Coupon")
+}
+
+model Image {
+  id        Int      @id @default(autoincrement()) @map("id")
+  url       String   @map("url") @db.VarChar(191)
+  productId Int      @map("productId")
+  createdAt DateTime @default(now()) @db.DateTime(3)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("Image")
+}
+
+model Product {
+  id              Int          @id @default(autoincrement()) @map("id")
+  name            String       @map("name") @db.VarChar(191)
+  description     String       @map("description") @db.VarChar(191)
+  discount        Float?       @map("discount")
+  isTopRated      Boolean?     @map("isTopRated")
+  price           Float        @map("price")
+  stock           Int          @map("stock")
+  subcategoryId   Int          @map("subcategoryId")
+  colors          Json?        @map("colors")
+  sizes           Json?        @map("sizes")
+  createdAt       DateTime     @default(now()) @db.DateTime(3)
+  updatedAt       DateTime     @updatedAt @db.DateTime(3)
+  metaTitle       String?      @map("meta_title") @db.VarChar(191)
+  metaDescription String?      @map("meta_description") @db.VarChar(191)
+  metaKeywords    String?      @map("meta_keywords") @db.VarChar(191)
+  subcategory     Subcategory  @relation(fields: [subcategoryId], references: [id])
+  images          Image[]
+  orderItems      OrderItem[]
+  reviews         Review[]
+
+  @@map("Product")
+}
+
+model Subcategory {
+  id              Int       @id @default(autoincrement()) @map("id")
+  name            String    @map("name") @db.VarChar(191)
+  imageUrl        String?   @map("imageUrl") @db.VarChar(191)
+  categoryId      Int       @map("categoryId")
+  createdAt       DateTime  @default(now()) @db.DateTime(3)
+  updatedAt       DateTime  @updatedAt @db.DateTime(3)
+  metaTitle       String?   @map("meta_title") @db.VarChar(191)
+  metaDescription String?   @map("meta_description") @db.VarChar(191)
+  metaKeywords    String?   @map("meta_keywords") @db.VarChar(191)
+  category        Category  @relation(fields: [categoryId], references: [id])
+  products        Product[]
+
+  @@map("Subcategory")
+}
+
+model Size {
+  id   Int     @id @default(autoincrement()) @map("id")
+  name String  @unique @map("name") @db.VarChar(191)
+
+  @@map("Size")
+}
+
+model Color {
+  id   Int     @id @default(autoincrement()) @map("id")
+  name String  @map("name") @db.VarChar(191)
+  hex  String? @map("hex") @db.VarChar(191)
+
+  @@map("Color")
 }
