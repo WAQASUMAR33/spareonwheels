@@ -138,7 +138,7 @@ const LoginPage = () => {
         throw new Error(result.error || 'Failed to upload image');
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Error is uploading  image:', error);
       throw error;
     }
   };
