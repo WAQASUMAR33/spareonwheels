@@ -299,6 +299,8 @@ model Product {
   subcategoryId   Int          @map("subcategoryId")
   colors          Json?        @map("colors")
   sizes           Json?        @map("sizes")
+  isPopular       Boolean?     @map("isPopular")
+  isFeatured       Boolean?    @map("isFeatured")
   createdAt       DateTime     @default(now()) @db.DateTime(3)
   updatedAt       DateTime     @updatedAt @db.DateTime(3)
   metaTitle       String?      @map("meta_title") @db.VarChar(191)
