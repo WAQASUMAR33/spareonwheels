@@ -119,6 +119,18 @@ model FacebookPixel {
   @@map("FacebookPixel")
 }
 
+
+model SocialMedia { 
+  id Int @id @default(autoincrement())
+   facebook String? @db.VarChar(191)
+    instagram String? @db.VarChar(191) 
+    twitter String? @db.VarChar(191) 
+    tiktok String? @db.VarChar(191) 
+    pinterest String? @db.VarChar(191)
+    createdAt DateTime @default(now()) @db.DateTime(3) 
+    updatedAt DateTime @updatedAt @db.DateTime(3) 
+   }
+
 model Model {
   id        String   @id @map("id") @db.VarChar(191)
   model     String   @map("Model") @db.VarChar(191)
